@@ -1,0 +1,109 @@
+services:
+  frontend:
+    image: ghcr.io/ensslinadrian/videoflix_frontend:latest
+    container_name: videoflix_frontend
+    build:
+      context: ./videoflix_frontend
+      args:
+        API_URL: ${FRONTEND_API_URL}
+    restart: unless-stopped
+    environment:
+      - VIRTUAL_HOST=${FRONTEND_VIRTUAL_HOST}
+      - VIRTUAL_PORT=${FRONTEND_VIRTUAL_PORT}
+      - LETSENCRYPT_HOST=${FRONTEND_VIRTUAL_HOST}
+      - LETSENCRYPT_EMAIL=${DEFAULT_FROM_EMAIL}
+    depends_on:
+      - backend
+    networks:
+      - videoflix-network
+      - proxy
+
+  backend:
+    image: ghcr.io/ensslinadrian/videoflix_backend:latest
+    container_name: videoflix_backend
+    build:
+      context: ./videoflix_backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - VIRTUAL_HOST=${BACKEND_VIRTUAL_HOST}
+      - VIRTUAL_PORT=${BACKEND_VIRTUAL_PORT}
+      - LETSENCRYPT_HOST=${BACKEND_VIRTUAL_HOST}
+      - LETSENCRYPT_EMAIL=${DEFAULT_FROM_EMAIL}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - media:/app/media
+      - static:/app/static
+    networks:
+      - videoflix-network
+      - proxy
+
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    networks:
+      - videoflix-network
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $DB_USER -d $DB_NAME"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
+    restart: unless-stopped
+    networks:
+      - videoflix-network
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    expose:
+      - "6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  rq-worker:
+    image: ghcr.io/ensslinadrian/videoflix_backend:latest
+    container_name: videoflix_rq_worker
+    command: python manage.py rqworker default  
+    entrypoint: []                             
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      redis:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+    volumes:
+      - media:/app/media
+      - static:/app/static
+    networks:
+      - videoflix-network
+
+volumes:
+  media:
+  static:
+  postgres_data:
+  redis_data:
+
+networks:
+  videoflix-network:
+  proxy:
+    external: true
+    

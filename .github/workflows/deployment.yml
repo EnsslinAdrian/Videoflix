@@ -1,0 +1,93 @@
+name: Deploment Workflow
+run-name: '[${{ github.ref_name }}] ${{ github.event.head_commit.message }}'
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy Application
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Login GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Frontend Image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./videoflix_frontend
+          file: ./videoflix_frontend/Dockerfile
+          push: true
+          tags: | 
+            ghcr.io/ensslinadrian/videoflix_frontend:latest
+            ghcr.io/ensslinadrian/videoflix_frontend:${{ github.sha }}
+          build-args: |
+            API_URL=${{ secrets.FRONTEND_API_URL }}
+
+      - name: Build Backend Image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./videoflix_backend
+          file: ./videoflix_backend/Dockerfile
+          push: true
+          tags: | 
+            ghcr.io/ensslinadrian/videoflix_backend:latest
+            ghcr.io/ensslinadrian/videoflix_backend:${{ github.sha }}
+
+
+      - name: Create and Copy .env to VM
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USERNAME }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          port: ${{ secrets.VM_SSH_PORT }}
+          script: |
+            cat << 'EOF' > ~/${{ secrets.PROJECT_PATH }}/.env
+            ${{ secrets.ENV_FILE }}
+            EOF
+            chmod 600 ~/${{ secrets.PROJECT_PATH }}/.env
+
+
+      - name: Copy Docker Compose to VM
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USERNAME }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          port: ${{ secrets.VM_SSH_PORT }}
+          source: ./docker-compose.yml
+          target: ~/${{ secrets.PROJECT_PATH }}
+
+
+      - name: Deploy Application on VM
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USERNAME }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          port: ${{ secrets.VM_SSH_PORT }}
+          script: |
+            set -e
+            cd ~/${{ secrets.PROJECT_PATH }}
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+            docker compose pull
+            docker compose down
+            docker compose up -d --force-recreate
+            docker image prune -f
+
+            docker logout ghcr.io
