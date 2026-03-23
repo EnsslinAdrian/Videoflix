@@ -1,0 +1,9 @@
+<app-header></app-header>
+
+<div *ngIf="!(authReady$ | async)" class="loading">
+  <div class="spinner"></div>
+</div>
+<router-outlet *ngIf="authReady$ | async"></router-outlet>
+
+<app-footer></app-footer>
+

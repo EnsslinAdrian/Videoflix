@@ -1,0 +1,23 @@
+footer {
+display: flex;
+justify-content: center;
+align-items: center;
+gap: 50px;
+width: 100%;
+box-sizing: border-box;
+height: 70px;
+z-index: 5;
+background-color: var(--black);
+}
+
+a {
+  text-decoration: none;
+  color: var(--white);
+  transition: all 0.2s ease-in-out;
+  font-size: 18px;
+  font-weight: 500;
+
+  &:hover {
+    color: var(--purple);
+  }
+}

@@ -1,0 +1,38 @@
+<header>
+  <div class="content-wrapper">
+    <img
+      *ngIf="showLogo"
+      #headerLogo
+      routerLink="/home"
+      src="img/logo/logo.svg"
+      alt="Logo"
+      class="logo-img"
+      [class.logo-hidden]="!logoVisible"
+    />
+    <img
+      *ngIf="showLogo"
+      #headerLogoShort
+      routerLink="/home"
+      src="img/logo/logo_short.svg"
+      alt="Logo"
+      class="logo-img-short"
+      [class.logo-hidden]="!logoVisible"
+    />
+
+    <a *ngIf="!(isLoggedIn$ | async)" class="link-btn" routerLink="login">
+      <app-typography text="Log in" size="medium" color="white" [weight]="700" [align]="'center'"></app-typography>
+    </a>
+    <a *ngIf="isLoggedIn$ | async;" class="link-btn" (click)="logout()">
+      <app-typography text="Log out" size="medium" color="white" [weight]="700" [align]="'center'"></app-typography>
+    </a>
+  </div>
+</header>
+
+<div *ngIf="showIntro" class="start-animation-container" #introContainer>
+  <div class="content-wrapper-animation">
+    <div class="img-wrapper" #imgWrapper>
+      <div class="mask" #maskEl></div>
+      <img src="img/logo/logo.svg" alt="Logo" class="start-animation-img" />
+    </div>
+  </div>
+</div>

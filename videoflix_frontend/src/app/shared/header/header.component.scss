@@ -1,0 +1,119 @@
+header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 30px 96px;
+  height: 100px;
+
+  @media (max-width: 960px) {
+    padding: 30px 20px;
+  }
+}
+
+.content-wrapper {
+  width: 100%;
+  max-width: 1920px;
+  height: 100%;
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.link-btn {
+  box-sizing: border-box;
+  border-radius: 20px;
+  padding: 10px 20px;
+  background-color: var(--purple);
+  transition: all 0.2s ease-in-out;
+  text-decoration: none;
+  position: absolute;
+  right: 0px;
+
+  &:hover {
+    background-color: var(--purple_hover);
+  }
+}
+
+.logo-img {
+  cursor: pointer;
+  width: 200px;
+  opacity: 1;
+
+  &.logo-hidden {
+    opacity: 0;
+  }
+
+  @media (max-width: 420px) {
+    display: none;
+  }
+}
+
+.logo-img-short {
+  display: none;
+  cursor: pointer;
+
+  &.logo-hidden {
+    opacity: 0;
+  }
+
+  @media (max-width: 420px) {
+    display: block;
+  }
+}
+
+// ── Intro overlay ──────────────────────────────────────────────────────────────
+
+.start-animation-container {
+  width: 100%;
+  height: 100%;
+  background-color: var(--black);
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  overflow: hidden;
+}
+
+.content-wrapper-animation {
+  width: 100%;
+  max-width: 1920px;
+  height: 100%;
+  position: relative;
+  margin: 0 auto;
+}
+
+// Centered logo wrapper – GSAP converts this to fixed + animates it
+.img-wrapper {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 50%;
+  transform: translate(-50%, -50%);
+  overflow: hidden;
+}
+
+// Mask div replaces the ::before pseudo-element so GSAP can animate it
+.mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--black);
+  z-index: 1;
+}
+
+.start-animation-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  position: relative;
+  z-index: 0;
+}
