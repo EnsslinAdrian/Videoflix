@@ -7,8 +7,6 @@ import { UrlsService } from '../../../services/urls/urls.service';
 import { Movie } from '../../../interfaces/movie';
 import { HttpClient } from '@angular/common/http';
 
-
-
 @Component({
   selector: 'app-homepage',
   imports: [TypographyComponent, CommonModule],
@@ -57,7 +55,7 @@ ngOnInit() {
     });
   });
 
-  this.http.get<any[]>(this.urls.baseUrl + 'api/movie/trailer/')
+  this.http.get<any[]>(this.urls.baseUrl + '/movie/trailer/')
     .subscribe(data => {
       if (data.length > 0) {
         this.trailerUrl = data[0]['video'];
