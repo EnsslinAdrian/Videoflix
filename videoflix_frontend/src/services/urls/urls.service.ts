@@ -6,8 +6,8 @@ import { environment } from '../../environments/environment';
   providedIn: 'root'
 })
 export class UrlsService {
-  baseUrl: string = environment.apiUrl.endsWith('/') ? environment.apiUrl : environment.apiUrl + '/';
-  baseAuthUrl: string = this.baseUrl + 'api/auth/';
+  baseUrl: string = environment.apiUrl;
+  baseAuthUrl: string = this.baseUrl + '/auth/';
 
   // Authentication URLs
   registerUrl: string = this.baseAuthUrl + 'register/';
@@ -21,8 +21,8 @@ export class UrlsService {
   refreshUrl: string = this.baseAuthUrl + 'refresh/';
 
   // Movie URLs
-  moviesUrl: string = this.baseUrl + 'api/movie/';
-  trailer: string = this.baseUrl + 'api/movie/trailer/';
+  moviesUrl: string = this.baseUrl + '/movie/';
+  trailer: string = this.baseUrl + '/movie/trailer/';
   trailerMovieId: number = 13;
 
 }
