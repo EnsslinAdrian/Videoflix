@@ -187,6 +187,10 @@ REST_FRAMEWORK = {
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
+# Trust X-Forwarded-Proto header from reverse proxy (Nginx) so Django
+# generates https:// URLs for media files in production
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 RQ_QUEUES = {
     'default': {
         'HOST': os.getenv("REDIS_HOST", "redis"),
